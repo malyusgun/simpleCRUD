@@ -1,49 +1,55 @@
 import http from "http";
-import dotenv from "dotenv";
 import {
   getUsersController,
   getUserController,
   addUserController,
+  editUserController,
+  deleteUserController,
 } from "./controllers/users.ts";
+import { getEnvVariable } from "./helpers/index.js";
 
-dotenv.config();
-const PORT = process.env.PORT || 4000;
+const PORT = (await getEnvVariable("PORT")) ?? 3000;
 let data = [];
-
 const server = http.createServer((request, response) => {
   request.on("data", (chunk) => {
-    console.log("chunk: ", chunk);
+    chunk = JSON.parse(chunk);
     data.push(chunk);
-    console.log("request.url: ", request.url);
-    console.log("request.method: ", request.method);
     const url = request.url;
     const body = data.at(-1);
-    console.log("body: ", body);
     switch (request.method) {
-      case "GET":
-        if (url === "/users") {
-          response = getUsersController(request, response);
-          response.end();
-          break;
-        }
-        if (url.startsWith("/users/")) {
-          response = getUserController(request, response);
-          response.end();
-          break;
-        }
-        response.statusCode = 400;
-        response.write(`CANNOT GET ${request.url}`);
-        response.end();
-        break;
       case "POST":
-        if (url === "/users") {
-          response = addUserController(request, response, body);
+        try {
+          if (url === "/users") {
+            response = addUserController(response, body);
+            response.end();
+            break;
+          }
+          response.statusCode = 404;
+          response.write(
+            `Incorrect request (probably, this endpoint does not exist).`,
+          );
           response.end();
-          break;
+        } catch (err) {
+          response.statusCode = 500;
+          response.write(`Internal server error: ${err.message}`);
         }
-        response.statusCode = 400;
-        response.write(`CANNOT GET ${request.url}`);
-        response.end();
+        break;
+      case "PUT":
+        try {
+          if (url.startsWith("/users/")) {
+            response = editUserController(request, response, body);
+            response.end();
+            break;
+          }
+          response.statusCode = 404;
+          response.write(
+            `Incorrect request (probably, this endpoint does not exist).`,
+          );
+          response.end();
+        } catch (err) {
+          response.statusCode = 500;
+          response.write(`Internal server error: ${err.message}`);
+        }
         break;
     }
   });
@@ -53,4 +59,47 @@ server.listen(PORT, (request, response, err) => {
   err ? console.error(err) : console.log(`listening on port ${PORT}`);
 });
 
-server.on("request", (request, response) => {});
+server.on("request", (request, response) => {
+  const url = request.url;
+  switch (request.method) {
+    case "GET":
+      try {
+        if (url === "/users") {
+          response = getUsersController(response);
+          response.end();
+          break;
+        }
+        if (url.startsWith("/users/")) {
+          response = getUserController(request, response);
+          response.end();
+          break;
+        }
+        response.statusCode = 404;
+        response.write(
+          `Incorrect request (probably, this endpoint does not exist).`,
+        );
+        response.end();
+      } catch (err) {
+        response.statusCode = 500;
+        response.write(`Internal server error: ${err.message}`);
+      }
+      break;
+    case "DELETE":
+      try {
+        if (url.startsWith("/users/")) {
+          response = deleteUserController(request, response);
+          response.end();
+          break;
+        }
+        response.statusCode = 404;
+        response.write(
+          `Incorrect request (probably, this endpoint does not exist).`,
+        );
+        response.end();
+      } catch (err) {
+        response.statusCode = 500;
+        response.write(`Internal server error: ${err.message}`);
+      }
+      break;
+  }
+});
