@@ -1,25 +1,33 @@
-const path = require("path");
+import path from "path";
 
-module.exports = {
-  entry: "./src/index.js",
+export default {
+  entry: "./index.js",
 
   output: {
     filename: "bundle.js",
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(process.cwd(), "dist"),
   },
 
   module: {
-    rules: [],
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: "ts-loader",
+        exclude: /node_modules/,
+      },
+    ],
   },
-
+  resolve: {
+    extensions: [".ts", ".js"],
+  },
   plugins: [],
 
   devServer: {
     static: {
-      directory: path.join(__dirname, "dist"), // Каталог для статики
+      directory: path.join(process.cwd(), "dist"),
     },
-    open: true, // Автоматически открывать браузер
+    open: true,
   },
 
-  mode: "development", // Режим сборки
+  mode: "development",
 };
