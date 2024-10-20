@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ESNext",
+    "esModuleInterop": true,
+    "moduleResolution": "Node",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "ts-node": {
+    "experimentalSpecifierResolution": "node",
+    "transpileOnly": true,
+    "esm": true,
+  }
+}
+//{
+//  "compilerOptions": {
+//    "outDir": "./dist/",
+//    "noImplicitAny": true,
+//    "module": "es6",
+//    "target": "es5",
+//    "allowJs": true,
+//    "moduleResolution": "Node",
+//    "ts-node": {
+//      "experimentalSpecifierResolution": "node",
+//      "transpileOnly": true,
+//      "esm": true,
+//    }
+//  }
+//}
